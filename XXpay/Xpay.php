@@ -2,14 +2,14 @@
 namespace XXpay;
 class Xpay extends Pay
 {
-    /**代收
-     * @param  int  $amount  金额
-     * @param  string  $order_num  商户订单号
-     * @param  string  $channel  通道号
-     * @param  string  $payTye  回调方法
-     * @param  string  $callbackUrl  支付成功跳转地址
-     * @param  string  $product  产品名称
-     * @return  array ['状态码','提示','支付地址','渠道订单号']
+    /**
+     * @param  int  $amount  
+     * @param  string  $order_num  
+     * @param  string  $channel  
+     * @param  string  $payTye  
+     * @param  string  $callbackUrl  
+     * @param  string  $product  
+     * @return  array ['','','','']
      */
     public function pay($amount, $order_num, $channel, $payTye, $callbackUrl = '', $product = '')
     {
@@ -32,7 +32,7 @@ class Xpay extends Pay
         return $this->returnData($code, $msg, $payUrl, $passageOrder);
     }
 
-    /**代付
+    /**
      * @param  int  $amount  
      * @param  string  $order_num
      * @param  string  $channel
@@ -60,14 +60,14 @@ class Xpay extends Pay
         return $this->returnData($code, $msg, $payUrl, $passageOrder);
     }
     /**
-     * 代收请求
-     * @param  string  $amount  金额
-     * @param  string  $order_num  商户订单号
-     * @param  string  $channel  通道号
-     * @param  string  $payTye  回调方法
-     * @param  string  $callbackUrl  支付成功跳转地址
-     * @param  string  $product  产品名称
-     * @return  array ['状态码','提示','支付地址','渠道订单号']
+     * 
+     * @param  string  $amount  
+     * @param  string  $order_num  
+     * @param  string  $channel  
+     * @param  string  $payTye  
+     * @param  string  $callbackUrl  
+     * @param  string  $product  
+     * @return  array ['','','','']
      */
     public function sendPayInRequest($amount, $order_num, $channel, $payTye, $callbackUrl, $product)
     {
@@ -79,7 +79,7 @@ class Xpay extends Pay
             'merchant_id' => $this->merchant_id,
             'order_id' => $order_num,
             'timestamp' => time(),
-            'notify_url' => $this->notifyUrl . '/api/paynotify/notify/' . $payTye . 'notify', //异步从通知回调地址
+            'notify_url' => $this->notifyUrl . '/api/paynotify/notify/' . $payTye . 'notify', //
             'callback_url' => $callbackUrl,
             'amount' => $amount . '',
             'phone' => '9' . substr($order_num, -9),
@@ -104,11 +104,7 @@ class Xpay extends Pay
         return $return_data;
     }
 
-    /**
-     * 回调函数
-     * @param  string  $type  pay 代收 payout 代付
-     * @return  array ['success or fail','msg','amount','platformOrder','order']
-     */
+
     public function notify($type)
     {
         $data = $this->payInNotify();
@@ -121,15 +117,11 @@ class Xpay extends Pay
         return $this->returnOrder($status, $msg, $data['amount'], $data['plat_order_id'], $data['mch_order_id'], 'SUCCESS');
     }
 
-    /**
-     * 代收回调处理
-     */
     public function payInNotify()
     {
         $data = file_get_contents("php://input");
 
         if (empty($data)) {
-            //TODO 参数为空返回处理
             exit("parameter is empty");
         }
         $return_data = json_decode($data, true);
@@ -138,14 +130,13 @@ class Xpay extends Pay
         $sign_str = $this->asc_sort($return_data);
         $sign_str = $sign_str . '&key=' . $this->secret;
         if ($sign != md5($sign_str)) {
-            //TODO 签名不正确处理
             exit("incorrect signature");
         }
         return $return_data;
     }
 
     /**
-     * 代付safe pay对接
+     * 
      * @param $amount
      * @param $order_num
      * @param $card_info
@@ -156,18 +147,18 @@ class Xpay extends Pay
         $api_pay_url = $this->apiHost . '/api/xpay/create/payout';
         $payType=$card_info['payType'];
         $data = [
-            'merchant_id' => $this->merchant_id, //商户id
-            'order_id' => $order_num, //商家自己平台的订单号
-            'amount' => '' . $amount, //代付金额
+            'merchant_id' => $this->merchant_id, //
+            'order_id' => $order_num, //
+            'amount' => '' . $amount, //
             'timestamp' => time(),
-            //'notify_url' => $this->notifyUrl.'/api/paynotify/xpaywithdrawnotify', //回调地址
+            //'notify_url' => $this->notifyUrl.'/api/paynotify/xpaywithdrawnotify', //
             'notify_url' => $this->notifyUrl . '/api/paynotify/withdrawnotify/' . $payType . 'withdrawnotify',
             'phone' => '9' . substr($order_num, -9),
             'acc_type' => '1',
-            'account_name' => $card_info['bank_account_name'], //用户银行账户名称
-            'account' => $card_info['bank_account'], //用户银行账号
+            'account_name' => $card_info['bank_account_name'], //
+            'account' => $card_info['bank_account'], //
             'bank_name' => $card_info['bank_name'],
-            'bank_ifsc' => $card_info['ifsc_code'], //ifsc码
+            'bank_ifsc' => $card_info['ifsc_code'], //
             'email' => 'youmecoffee@gmail.com',
         ];
         $sign_str = $this->asc_sort($data);
@@ -191,7 +182,7 @@ class Xpay extends Pay
         $api_pay_url = $this->apiHost . '/api/xpay/query/balance';
   
         $data = [
-            'merchant_id' => $this->merchant_id, //商户id
+            'merchant_id' => $this->merchant_id, //
             'timestamp' => time(),
         ];
         $sign_str = $this->asc_sort($data);
@@ -214,7 +205,7 @@ class Xpay extends Pay
         $api_pay_url = $this->apiHost . '/api/xpay/query/order';
   
         $data = [
-            'merchant_id' => $this->merchant_id, //商户id
+            'merchant_id' => $this->merchant_id, //
             'timestamp' => time(),
         ];
         $sign_str = $this->asc_sort($data);
